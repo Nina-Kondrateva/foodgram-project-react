@@ -37,7 +37,7 @@ class CustomUserViewSet(UserViewSet):
         if self.request.method == 'GET':
             return User.objects.all()
 
-    @action(detail=True, methods=['post', 'delete',], url_path='subscribe')
+    @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, id=None):
         # создание и удаление подписки
         user = request.user
@@ -146,14 +146,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 return Response(status=status.HTTP_204_NO_CONTENT)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post', 'delete',], url_path='favorite',
+    @action(detail=True, methods=['post', 'delete'], url_path='favorite',
             serializer_class=FavoriteSerializer)
     def favorite(self, request, pk=None):
         # добавление рецепта в избранное и его удаление
         models = Favorite
         return self.creation_and_deletion(request, models, pk)
 
-    @action(detail=True, methods=['post', 'delete',], url_path='shopping_cart',
+    @action(detail=True, methods=['post', 'delete'], url_path='shopping_cart',
             serializer_class=ShoppinglistSerializer)
     def shopping_cart(self, request, pk=None):
         # добавление рецепта в список покупок и его удаление
