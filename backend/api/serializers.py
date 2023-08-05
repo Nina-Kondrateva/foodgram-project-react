@@ -1,6 +1,4 @@
-import base64
-
-from django.core.files.base import ContentFile
+from drf_extra_fields.fields import Base64ImageField
 from djoser.serializers import UserSerializer
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             Shoppinglist, Tag)
@@ -18,7 +16,6 @@ class CustomUserSerializer(UserSerializer):
                   'last_name', 'is_subscribed')
 
     def get_is_subscribed(self, value):
-        # получаем наличие/отсутсвие подписки на автора
         if self.context.get('request').user.is_anonymous:
             return False
         return Subscriptions.objects.filter(user=self.context['request'].user,
@@ -68,16 +65,13 @@ class SubscriptionsGETSerializer(serializers.ModelSerializer):
                   'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, value):
-        # получаем необходимый вид рецепта
         recipes = Recipe.objects.filter(author=value.subscribing.id)
         return RecipeLookSerializer(recipes, many=True).data
 
     def get_recipes_count(self, value):
-        # подсчет колличества рецептов автора
         return Recipe.objects.filter(author=value.subscribing.id).count()
 
     def get_is_subscribed(self, value):
-        # получаем наличие/отсутсвие подписки на автора
         return Subscriptions.objects.filter(
             user=value.user.id, subscribing=value.subscribing.id).exists()
 
@@ -102,18 +96,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
         return data
 
 
-class Base64ImageField(serializers.ImageField):
-    """Сериализатор для изображений."""
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
-
-
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Ingredient."""
 
@@ -127,7 +109,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = ('id', 'name', 'color', 'slug')
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -173,10 +155,18 @@ class RecipeGETSerializer(serializers.ModelSerializer):
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     """Дополнительный сериализатор для ингредиента при создании рецепта."""
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    amount = serializers.IntegerField()
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount')
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                'Количество должно быть больше 0.'
+            )
+        return value
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
@@ -185,6 +175,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(), many=True)
     ingredients = RecipeIngredientCreateSerializer(many=True)
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
@@ -192,7 +183,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'text', 'cooking_time')
 
     def add_ingredient(self, recipes, ingredients):
-        # создание связи инегредиент-рецепт
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
             amount = ingredient['amount']
@@ -200,7 +190,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 ingredients=ingredient_id, recipes=recipes, amount=amount)
 
     def create(self, validated_data):
-        # создание рецепта
         ingredients = validated_data.pop('ingredients')
         tag = validated_data.pop('tags')
         recipes = Recipe.objects.create(**validated_data)
@@ -209,7 +198,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return recipes
 
     def update(self, recipes, validated_data):
-        # редактирование рецепта
         ingredients = validated_data.pop('ingredients')
         tag = validated_data.pop('tags')
         recipes.ingredients.clear()
@@ -218,17 +206,42 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return super().update(recipes, validated_data)
 
     def to_representation(self, recipe):
-        print(recipe)
         return RecipeGETSerializer(
             recipe,
             context={'request': self.context.get('request')},
         ).data
 
     def validate_cooking_time(self, value):
-        if value < 1:
+        if value < 5:
             raise serializers.ValidationError(
-                'Время приготовления не может быть меньше минуты')
+                'Время приготовления не может быть меньше 5 минут')
         return value
+
+    def validate_ingredients(self, data):
+        list = []
+        if not data:
+            raise serializers.ValidationError(
+                'Необходимо выбрать хоть один ингредиент')
+        for ingredient in data:
+            if ingredient['id'] in list:
+                raise serializers.ValidationError(
+                    'Ингредиент может быть выбран только один раз.')
+            else:
+                list.append(ingredient['id'])
+        return data
+
+    def validate_tags(self, data):
+        list = []
+        if not data:
+            raise serializers.ValidationError(
+                'Необходимо выбрать хоть один тег')
+        for tag in data:
+            if tag in list:
+                raise serializers.ValidationError(
+                    'Тег может быть выбран только один раз.')
+            else:
+                list.append(tag)
+        return data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

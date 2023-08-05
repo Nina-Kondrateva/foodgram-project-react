@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
     'django_filters',
+    'colorfield'
 ]
 
 MIDDLEWARE = [
@@ -87,19 +88,15 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
 
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -109,7 +106,6 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
@@ -128,3 +124,7 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny']
     },
 }
+
+INT_200 = 200
+INT_150 = 150
+INT_254 = 254

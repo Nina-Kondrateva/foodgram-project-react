@@ -28,8 +28,26 @@ python manage.py migrate
 ```
 
 
+Импортировать базы данных с ингредиентами:
+```
+python3 manage.py import_data
+```
+
+
 Запустить проект:
 ```
 python manage.py runserver
 ```
 
+
+**Используемые технологии:**
+```
+Django REST
+Python 3.2.3
+JavaScript
+Gunicorn
+Nginx
+PostgreSQL
+Docker
+```
+**Автор Nina-Kondrateva**

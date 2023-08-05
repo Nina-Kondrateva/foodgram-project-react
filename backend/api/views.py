@@ -1,5 +1,4 @@
 from django.db.models import Sum
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -19,6 +18,7 @@ from api.serializers import (CreateRecipeSerializer,
                              ShoppinglistSerializer,
                              SubscriptionsGETSerializer,
                              SubscriptionsSerializer, TagSerializer)
+from api.utils import download
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             Shoppinglist, Tag)
 from users.models import Subscriptions, User
@@ -33,13 +33,11 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        # список всех пользователей
         if self.request.method == 'GET':
             return User.objects.all()
 
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, id=None):
-        # создание и удаление подписки
         user = request.user
         subscribing = get_object_or_404(User, id=id)
         if self.request.method == 'POST':
@@ -104,13 +102,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     search_fields = ('^name',)
 
     def get_serializer_class(self):
-        # выбор сериализатора
         if self.request.method == 'PATCH' or 'POST':
             return CreateRecipeSerializer
         return RecipeGETSerializer
 
     def get_permissions(self):
-        #  выбор permissions
         if self.request.method == 'GET':
             return (IsAuthenticatedOrReadOnly(),)
         if self.request.method == 'PATCH':
@@ -118,11 +114,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def perform_create(self, serializer):
-        # определение, что user является автором
         serializer.save(author=self.request.user)
 
     def creation_and_deletion(self, request, models, pk):
-        # функция для создания и удаления связанных обектов user и recipe
         user = request.user.id
         recipe = get_object_or_404(Recipe, id=pk).id
         if self.request.method == 'POST':
@@ -149,36 +143,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post', 'delete'], url_path='favorite',
             serializer_class=FavoriteSerializer)
     def favorite(self, request, pk=None):
-        # добавление рецепта в избранное и его удаление
         models = Favorite
         return self.creation_and_deletion(request, models, pk)
 
     @action(detail=True, methods=['post', 'delete'], url_path='shopping_cart',
             serializer_class=ShoppinglistSerializer)
     def shopping_cart(self, request, pk=None):
-        # добавление рецепта в список покупок и его удаление
         models = Shoppinglist
         return self.creation_and_deletion(request, models, pk)
 
     @action(detail=False, methods=['get'], url_path='download_shopping_cart',
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        # распечатать список покупок
         ingredients_list = RecipeIngredient.objects.filter(
-            recipes__recipe_shopping__user=request.user
+            recipes__recipe_shoppinglist__user=request.user
         ).values(
             'ingredients__name',
             'ingredients__measurement_unit'
         ).annotate(amount=Sum('amount'))
-        new_list = 'Список покупок: \n'
-        for ingredient in ingredients_list:
-            new_list += (f'{ingredient["ingredients__name"]} - '
-                         f'{ingredient["amount"]} '
-                         f'{ingredient["ingredients__measurement_unit"]} \n')
-        response = HttpResponse(new_list, 'Content-Type: text/plain')
-        response['Content-Disposition'] = ('attachment; '
-                                           'filename="buylist.txt"')
-        return response
+        return download(ingredients_list)
 
 
 class FavoritesList(mixins.ListModelMixin,
