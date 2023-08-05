@@ -12,10 +12,9 @@ from api.filters import IngregientFilter, RecipeFilter
 from api.mixins import ListRetrieveViewSet
 from api.pagination import Pagination
 from api.permissions import AuthorOrReadOnly
-from api.serializers import (CreateRecipeSerializer,
-                             CustomUserSerializer, FavoriteSerializer,
-                             IngredientSerializer, RecipeGETSerializer,
-                             ShoppinglistSerializer,
+from api.serializers import (CreateRecipeSerializer, CustomUserSerializer,
+                             FavoriteSerializer, IngredientSerializer,
+                             RecipeGETSerializer, ShoppinglistSerializer,
                              SubscriptionsGETSerializer,
                              SubscriptionsSerializer, TagSerializer)
 from api.utils import download

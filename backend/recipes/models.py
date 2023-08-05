@@ -1,6 +1,6 @@
-from django.core.validators import (
-    MaxValueValidator, MinValueValidator, RegexValidator)
 from colorfield.fields import ColorField
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 from foodgram.settings import INT_200
@@ -28,7 +28,7 @@ class Tag(models.Model):
             message='Slug жанра содержит недопустимые символы'
         )])
 
-    class Meta():
+    class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
         ordering = ('name',)
@@ -135,7 +135,7 @@ class RecipeTag(models.Model):
         Tag,
         on_delete=models.CASCADE)
 
-    class Meta():
+    class Meta:
         verbose_name = 'Тег рецепта'
         verbose_name_plural = 'Теги рецепта'
         constraints = [models.UniqueConstraint(
@@ -168,7 +168,7 @@ class RecipeIngredient(models.Model):
         )
     )
 
-    class Meta():
+    class Meta:
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
         constraints = [models.UniqueConstraint(
