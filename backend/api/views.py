@@ -32,9 +32,9 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = Pagination
     filter_backends = (DjangoFilterBackend,)
 
-    # def get_queryset(self):
-    #     if self.request.method == 'GET':
-    #         return User.objects.all()
+    def get_queryset(self):
+        if self.request.method == 'GET':
+            return User.objects.all()
 
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, id=None):

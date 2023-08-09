@@ -131,7 +131,7 @@ class RecipeGETSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
         many=True, source='recipe_ingredients')
-    is_favorited = serializers.SerializerMethodField(read_only=True,)
+    is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
