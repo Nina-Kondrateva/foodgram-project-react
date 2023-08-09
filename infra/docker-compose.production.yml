@@ -1,7 +1,7 @@
 version: '3.3'
 
 volumes:
-  pg_data_foodgram:
+  pg_data_foodgram_production:
   static:
   media:
 
@@ -11,9 +11,9 @@ services:
     env_file: ../.env
     restart: always
     volumes:
-      - pg_data_foodgram:/var/lib/postgresql/data
+      - pg_data_foodgram_production:/var/lib/postgresql/data
   backend:
-    build: ../backend/
+    image: ninakond/foodgram_backend
     env_file: ../.env
     restart: always
     volumes:
@@ -22,9 +22,7 @@ services:
     depends_on:
       - db
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: ninakond/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
   nginx:
@@ -38,5 +36,3 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/etc/nginx/html/static/
       - media:/media/
-      # - static:/var/html/static/
-      # - media:/var/html/media/

@@ -170,5 +170,8 @@ class FavoritesList(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated,)
     pagination_class = Pagination
 
-    def get_queryset(self):
+    def get_queryset(self, request):
+        # user = request.user
+        # recipe = get_object_or_404(Recipe, id=id)
+        # return Favorite.objects.filter(user=user, recipe=recipe)
         return Favorite.objects.filter(user=self.request.user.id)
