@@ -99,7 +99,7 @@ sudo systemctl reload nginx
 ```
 Зарегистироваться: https://mylovefood.hopto.org/signin
 Главная страница: https://mylovefood.hopto.org/
-Посмотерть конкретный рецепт: https://mylovefood.hopto.org/1/
+Посмотерть конкретный рецепт: https://mylovefood.hopto.org/recipes/1
 ```
 
 **Используемые технологии:**
