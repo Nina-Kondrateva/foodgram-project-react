@@ -30,10 +30,11 @@ class CustomUserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
     permission_classes = (AllowAny,)
     pagination_class = Pagination
+    filter_backends = (DjangoFilterBackend,)
 
-    def get_queryset(self):
-        if self.request.method == 'GET':
-            return User.objects.all()
+    # def get_queryset(self):
+    #     if self.request.method == 'GET':
+    #         return User.objects.all()
 
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, id=None):
@@ -96,7 +97,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeGETSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = Pagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
     search_fields = ('^name',)
 
@@ -161,17 +162,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'ingredients__measurement_unit'
         ).annotate(amount=Sum('amount'))
         return download(ingredients_list)
-
-
-class FavoritesList(mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
-    """Получение списка избранных рецептов."""
-    serializer_class = FavoriteSerializer
-    permission_classes = (IsAuthenticated,)
-    pagination_class = Pagination
-
-    def get_queryset(self, request):
-        # user = request.user
-        # recipe = get_object_or_404(Recipe, id=id)
-        # return Favorite.objects.filter(user=user, recipe=recipe)
-        return Favorite.objects.filter(user=self.request.user.id)

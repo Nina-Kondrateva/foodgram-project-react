@@ -247,7 +247,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления ингедиента в избранное."""
-    # user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Favorite

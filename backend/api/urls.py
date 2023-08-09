@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from api.views import (CustomUserViewSet, FavoritesList, IngredientViewSet,
+from api.views import (CustomUserViewSet, IngredientViewSet,
                        RecipeViewSet, SubcriptionsList, TagViewSet)
 
 app_name = 'api'
@@ -13,7 +13,6 @@ router.register('ingredients', IngredientViewSet)
 router.register('users/subscriptions', SubcriptionsList,
                 basename='users/subscriptions')
 router.register('users', CustomUserViewSet)
-router.register('favorites', FavoritesList, basename='favorites')
 
 urlpatterns = [
     path('', include(router.urls)),
