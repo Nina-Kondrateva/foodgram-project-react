@@ -97,7 +97,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeGETSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = Pagination
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     search_fields = ('^name',)
 
