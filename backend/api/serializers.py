@@ -177,6 +177,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientCreateSerializer(many=True)
     image = Base64ImageField()
     cooking_time = serializers.IntegerField()
+    name = serializers.RegexField(
+        regex=r'^[а-яА-Яa-zA-Z0-9]+$',
+        error_messages={
+            'invalid': 'Для названия рецепта вы можете использовать '
+                       'только буквы и цифры.'})
 
     class Meta:
         model = Recipe
@@ -243,6 +248,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             else:
                 list.append(tag)
         return data
+
+    def validate_name(self, value):
+        if value.isdigit():
+            raise serializers.ValidationError(
+                'Название не может состоять только из цифр.')
+        return value
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
